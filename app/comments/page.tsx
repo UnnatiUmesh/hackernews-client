@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useCallback } from "react";
 
 interface Comment {
   id: string;
@@ -23,7 +23,7 @@ export default function AllCommentsPage() {
   const [loading, setLoading] = useState(false);
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  const fetchComments = async (currentPage: number) => {
+  const fetchComments =useCallback( async (currentPage: number) => {
     setLoading(true);
     try {
       const res = await fetch(
@@ -35,7 +35,20 @@ export default function AllCommentsPage() {
       const data = await res.json();
 
       if (res.ok) {
-        const cleanedComments: Comment[] = (data.data ?? []).filter((c: any): c is Comment => !!c?.id);
+        const cleanedComments: Comment[] = (data.data ?? []).filter((c: unknown): c is Comment => {
+          if (
+            typeof c === "object" &&
+            c !== null &&
+            "id" in c &&
+            "content" in c &&
+            "createdAt" in c &&
+            "user" in c &&
+            "post" in c
+          ) {
+            return true;
+          }
+          return false;
+        })
 
         setComments((prev) => {
           const newComments = cleanedComments.filter((newComment) => {
@@ -51,11 +64,11 @@ export default function AllCommentsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  },[API_BASE]);
 
   useEffect(() => {
     fetchComments(page);
-  }, [page]);
+  }, [fetchComments,page]);
 
   return (
     <div className="bg-[#f6f6ef] min-h-screen pt-20 px-4 text-[13px] text-black max-w-2xl mx-auto">
@@ -111,3 +124,5 @@ export default function AllCommentsPage() {
   );
   
 }
+
+
