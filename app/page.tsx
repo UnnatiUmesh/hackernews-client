@@ -1,17 +1,13 @@
-import React from 'react'
-import NavigationBar from './components/navigation-bar/NavigationBar'
-import PostPage from './components/post-page/PostPage'
+import React from "react";
 
-
+import PostPage from "./components/post-page/PostPage";
 
 const RootPage = () => {
   return (
     <div>
-     
-      
       <PostPage />
-      </div>
-  )
-}
+    </div>
+  );
+};
 
-export default RootPage
+export default RootPage;
