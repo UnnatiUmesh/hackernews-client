@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState,useCallback } from "react";
 import { useParams } from "next/navigation";
 
 type Post = {
@@ -31,7 +31,7 @@ export default function PostDetailPage() {
   const [editedContent, setEditedContent] = useState("");
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  const fetchCurrentUser = async () => {
+  const fetchCurrentUser = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE}/api/auth/user`, {
         credentials: "include",
@@ -43,9 +43,9 @@ export default function PostDetailPage() {
     } catch {
       console.error("Failed to fetch current user");
     }
-  };
+  },[API_BASE]);
 
-  const fetchPost = async () => {
+  const fetchPost = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE}/posts/getpost/${id}`, {
         credentials: "include",
@@ -56,9 +56,9 @@ export default function PostDetailPage() {
     } catch {
       setError("Could not load the post");
     }
-  };
+  },[API_BASE,id]);
 
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE}/comments/on/${id}`, {
         credentials: "include",
@@ -68,9 +68,9 @@ export default function PostDetailPage() {
     } catch {
       console.error("Failed to fetch comments");
     }
-  };
+  },[API_BASE,id]);
 
-  const fetchLikes = async () => {
+  const fetchLikes = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE}/likes/on/${id}`, {
         credentials: "include",
@@ -81,7 +81,7 @@ export default function PostDetailPage() {
     } catch {
       console.error("Failed to fetch likes");
     }
-  };
+  },[API_BASE,id]);
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,7 +180,7 @@ export default function PostDetailPage() {
       fetchComments();
       fetchLikes();
     }
-  }, [id]);
+  }, [id,fetchComments,fetchCurrentUser,fetchLikes,fetchPost]);
 
   if (error) return <p className="text-red-600 p-4">{error}</p>;
   if (!post) return <p className="p-4">Loading...</p>;
