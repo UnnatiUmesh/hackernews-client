@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
 type User = {
@@ -63,7 +63,7 @@ export default function UserProfilePage() {
     };
 
     fetchUser();
-  }, [userId]);
+  }, [API_BASE,userId,commentPage,postPage,tab]);
 
   useEffect(() => {
     
@@ -78,12 +78,9 @@ export default function UserProfilePage() {
     }
   }, [tab]);
 
-  useEffect(() => {
-    if (!userId) return;
-    loadData();
-  }, [tab, postPage, commentPage]);
+  
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       if (tab === "submissions") {
@@ -115,7 +112,12 @@ export default function UserProfilePage() {
     } finally {
       setLoading(false);
     }
-  };
+  },[API_BASE,commentPage,postPage,tab,userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+    loadData();
+  }, [loadData,tab, postPage, commentPage,userId]);
 
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
@@ -139,7 +141,7 @@ export default function UserProfilePage() {
         <div className="text-sm">User</div>
         <div className="text-xl font-semibold">{user.username}</div>
         <div className="text-sm mt-1">Joined: {formatDate(user.createdAt)}</div>
-        {user.about && <div className="text-sm mt-2 italic text-white/90">"{user.about}"</div>}
+        {user.about && <div className="text-sm mt-2 italic text-white/90">{user.about}</div>}
       </div>
 
       <div className="flex justify-center gap-6 mb-4 text-sm">
