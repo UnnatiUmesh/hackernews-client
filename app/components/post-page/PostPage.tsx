@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,6 @@ export default function PostPage() {
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [totalPages, setTotalPages] = useState(1);
   const router = useRouter();
 
@@ -42,7 +41,7 @@ export default function PostPage() {
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
   
 
-  const fetchPosts = async (pageNum: number) => {
+  const fetchPosts = useCallback(async (pageNum: number) => {
     setLoading(true);
     setError("");
     try {
@@ -77,11 +76,11 @@ setPosts(visiblePosts);
     } finally {
       setLoading(false);
     }
-  };
+  },[API_BASE]);
 
   useEffect(() => {
     fetchPosts(page);
-  }, [page]);
+  }, [page,fetchPosts]);
 
   const handleVoteToggle = async (postId: string, liked: boolean) => {
     try {
@@ -217,7 +216,7 @@ setPosts(visiblePosts);
         ))}
       </ul>
 
-      {loading && (
+      {loading &&hasMore&& (
         <div className="mt-4 space-y-3">
           {[...Array(3)].map((_, i) => (
             <Skeleton key={i} className="h-24 w-full rounded-lg" />
