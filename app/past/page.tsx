@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { formatISO, subDays } from "date-fns";
 
 interface Post {
@@ -20,32 +20,37 @@ const PastPostsPage = () => {
   const [beforeDate, setBeforeDate] = useState(formatISO(new Date()));
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+  
+  const fetchPosts = useCallback(
+    async (pageNum: number, date: string) => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `${API_BASE}/posts/pastposts?before=${encodeURIComponent(date)}&page=${pageNum}&limit=${limit}`,
+          { credentials: "include" }
+        );
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error("❌ Server responded with:", res.status, errText);
+          return;
+        }
+        const data = await res.json();
+        setPosts(data.data);
+        setTotalPages(data.pagination.totalPages);
+      } catch (err) {
+        console.error("❌ Fetch failed completely:", err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [API_BASE, limit]
+  );
+
   useEffect(() => {
     fetchPosts(page, beforeDate);
-  }, [page, beforeDate]);
+  }, [fetchPosts, page, beforeDate]);
 
-  const fetchPosts = async (pageNum: number, date: string) => {
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `${API_BASE}/posts/pastposts?before=${encodeURIComponent(date)}&page=${pageNum}&limit=${limit}`,
-        { credentials: "include" }
-      );
-      if (!res.ok) {
-        const errText = await res.text();
-        console.error("❌ Server responded with:", res.status, errText);
-        return;
-      }
-      const data = await res.json();
-      setPosts(data.data);
-      setTotalPages(data.pagination.totalPages);
-    } catch (err) {
-      console.error("❌ Fetch failed completely:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  
   const loadMorePosts = () => {
     if (page < totalPages) {
       setPage((prevPage) => prevPage + 1);
