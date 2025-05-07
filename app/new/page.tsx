@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 interface Post {
   id: string;
@@ -17,7 +17,7 @@ export default function NewPostsPage() {
   const [loading, setLoading] = useState(false);
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  const fetchPosts = async (pageNum: number) => {
+  const fetchPosts = useCallback(async (pageNum: number) => {
     setLoading(true);
     try {
       const res = await fetch(
@@ -40,11 +40,11 @@ export default function NewPostsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  },[limit,API_BASE]);
 
   useEffect(() => {
     fetchPosts(1);
-  }, []);
+  }, [fetchPosts]);
 
   const handleLoadMore = () => {
     const nextPage = page + 1;
