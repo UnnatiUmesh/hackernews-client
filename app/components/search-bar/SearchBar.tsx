@@ -111,9 +111,9 @@ export default function SearchBar() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const pageSize = 5;
-  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
-
+  
   useEffect(() => {
+    const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
     if (query.length > 0) {
       fetch(
         `${API_BASE}/posts/search?q=${encodeURIComponent(query)}&page=${page}&pageSize=${pageSize}`,
